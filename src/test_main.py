@@ -1,7 +1,8 @@
 import unittest
-from htmlnode import HTMLNode
 from main import text_node_to_html_node
+from main import split_nodes_delimiter
 from textnode import TextNode, TextType
+from htmlnode import HTMLNode
 
 class TestMain(unittest.TestCase):
     def test_text_node_to_html_node_normal(self):
@@ -64,6 +65,53 @@ class TestMain(unittest.TestCase):
     def test_text_node_to_html_node_invalid_type(self):
         text_node = TextNode("normal text", "invalidtype")
         self.assertRaises(ValueError, text_node_to_html_node, text_node)
+
+    def test_split_nodes_delimiter_code(self):
+        old_nodes = [TextNode("This is text with a `code block` word", TextType.NORMAL)]
+        new_nodes = split_nodes_delimiter(old_nodes, "`", TextType.CODE)
+        self.assertEqual(new_nodes, [
+            TextNode("This is text with a ", TextType.NORMAL),
+            TextNode("code block", TextType.CODE),
+            TextNode(" word", TextType.NORMAL),
+        ])
+
+    def test_split_nodes_delimiter_bold_italic(self):
+        old_nodes = [
+            TextNode("This is text with a **bold** word", TextType.NORMAL),
+            TextNode("This is text with a _italic_ word", TextType.NORMAL),
+        ]
+        new_nodes = split_nodes_delimiter(old_nodes, "**", TextType.BOLD)
+        self.assertEqual(new_nodes, [
+            TextNode("This is text with a ", TextType.NORMAL),
+            TextNode("bold", TextType.BOLD),
+            TextNode(" word", TextType.NORMAL),
+            TextNode("This is text with a _italic_ word", TextType.NORMAL),
+        ])
+        new_nodes = split_nodes_delimiter(new_nodes, "_", TextType.ITALIC)
+        self.assertEqual(new_nodes, [
+            TextNode("This is text with a ", TextType.NORMAL),
+            TextNode("bold", TextType.BOLD),
+            TextNode(" word", TextType.NORMAL),
+            TextNode("This is text with a ", TextType.NORMAL),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" word", TextType.NORMAL),
+        ])
+
+    def test_split_nodes_delimiter_beginning_end(self):
+        old_nodes = [TextNode("_Italic_ word in the beginning, at the end _too_", TextType.NORMAL)]
+        new_nodes = split_nodes_delimiter(old_nodes, "_", TextType.ITALIC)
+        self.assertEqual(new_nodes, [
+            TextNode("Italic", TextType.ITALIC),
+            TextNode(" word in the beginning, at the end ", TextType.NORMAL),
+            TextNode("too", TextType.ITALIC),
+        ])
+
+    def test_split_nodes_delimiter_single_occurance(self):
+        old_nodes = [TextNode("There is nothing **bold here", TextType.NORMAL)]
+        new_nodes = split_nodes_delimiter(old_nodes, "**", TextType.BOLD)
+        self.assertEqual(new_nodes, [
+            TextNode("There is nothing **bold here", TextType.NORMAL),
+        ])
 
 if __name__ == "__main__":
     unittest.main()
