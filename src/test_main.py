@@ -3,7 +3,8 @@ from main import (
     text_node_to_html_node,
     split_nodes_delimiter,
     extract_markdown_images,
-    extract_markdown_links
+    extract_markdown_links,
+    text_to_textnodes
 )
 from textnode import TextNode, TextType
 from htmlnode import HTMLNode
@@ -193,6 +194,39 @@ class TestMain(unittest.TestCase):
     def test_extract_markdown_links_image(self):
         old_nodes = [TextNode("This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)", TextType.NORMAL)]
         self.assertListEqual(extract_markdown_links(old_nodes), old_nodes)
+
+    def test_text_to_textnodes_all_types(self):
+        text = "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        self.assertListEqual(text_to_textnodes(text), [
+            TextNode("This is ", TextType.NORMAL),
+            TextNode("text", TextType.BOLD),
+            TextNode(" with an ", TextType.NORMAL),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" word and a ", TextType.NORMAL),
+            TextNode("code block", TextType.CODE),
+            TextNode(" and an ", TextType.NORMAL),
+            TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", TextType.NORMAL),
+            TextNode("link", TextType.LINK, "https://boot.dev"),
+        ])
+
+    def test_text_to_textnodes_code_before_bold(self):
+        text = "There is nothing **bold** in my `code **block**`"
+        self.assertListEqual(text_to_textnodes(text), [
+            TextNode("There is nothing ", TextType.NORMAL),
+            TextNode("bold", TextType.BOLD),
+            TextNode(" in my ", TextType.NORMAL),
+            TextNode("code **block**", TextType.CODE),
+        ])
+
+    def test_text_to_textnodes_bold_before_italic(self):
+        text = "There is nothing _italic_ in my **bold _text_**"
+        self.assertListEqual(text_to_textnodes(text), [
+            TextNode("There is nothing ", TextType.NORMAL),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" in my ", TextType.NORMAL),
+            TextNode("bold _text_", TextType.BOLD),
+        ])
 
 if __name__ == "__main__":
     unittest.main()

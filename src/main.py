@@ -61,6 +61,15 @@ def split_nodes_regex(old_nodes, pattern, text_type):
             new_nodes.append(TextNode(text, TextType.NORMAL))
     return new_nodes
 
+def text_to_textnodes(text):
+    nodes = [TextNode(text, TextType.NORMAL)]
+    nodes = extract_markdown_images(nodes)
+    nodes = extract_markdown_links(nodes)
+    nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
+    nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
+    nodes = split_nodes_delimiter(nodes, "_", TextType.ITALIC)
+    return nodes
+
 def main():
     print("hello world")
 
