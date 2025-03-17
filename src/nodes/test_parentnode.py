@@ -1,6 +1,6 @@
 import unittest
-from parentnode import ParentNode
-from leafnode import LeafNode
+from .parentnode import ParentNode
+from .leafnode import LeafNode
 
 class TestParentNode(unittest.TestCase):
     def test_parent_to_html_no_children(self):

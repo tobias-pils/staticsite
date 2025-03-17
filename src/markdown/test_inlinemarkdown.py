@@ -1,15 +1,15 @@
 import unittest
-from main import (
+from .inlinemarkdown import (
     text_node_to_html_node,
     split_nodes_delimiter,
     extract_markdown_images,
     extract_markdown_links,
     text_to_textnodes
 )
-from textnode import TextNode, TextType
-from htmlnode import HTMLNode
+from nodes.textnode import TextNode, TextType
+from nodes.htmlnode import HTMLNode
 
-class TestMain(unittest.TestCase):
+class TestInlineMarkdown(unittest.TestCase):
     def test_text_node_to_html_node_normal(self):
         text_node = TextNode("normal text", TextType.NORMAL)
         html_node = text_node_to_html_node(text_node)
