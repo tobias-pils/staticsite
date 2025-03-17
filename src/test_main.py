@@ -118,77 +118,81 @@ class TestMain(unittest.TestCase):
         ])
 
     def test_extract_markdown_images_simple(self):
-        matches = extract_markdown_images(
-                "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
-            )
-        self.assertListEqual(matches, [("image", "https://i.imgur.com/zjjcJKZ.png")])
+        old_nodes = [TextNode("This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)", TextType.NORMAL)]
+        self.assertListEqual(extract_markdown_images(old_nodes), [
+            TextNode("This is text with an ", TextType.NORMAL),
+            TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png")
+        ])
 
     def test_extract_markdown_images_multiple(self):
-            matches = extract_markdown_images(
-                    "This is text with multiple images: this ![image](https://i.imgur.com/zjjcJKZ.png)"
-                    + " and that ![other image](https://i.imgur.com/fJRm4Vk.jpeg)"
-                )
-            self.assertListEqual(matches, [
-                ("image", "https://i.imgur.com/zjjcJKZ.png"),
-                ("other image", "https://i.imgur.com/fJRm4Vk.jpeg")
-            ])
+        old_nodes = [
+            TextNode("This is text with multiple images:", TextType.NORMAL),
+            TextNode("this ![image](https://i.imgur.com/zjjcJKZ.png) and that ![other image](https://i.imgur.com/fJRm4Vk.jpeg)", TextType.NORMAL)
+        ]
+        self.assertListEqual(extract_markdown_images(old_nodes), [
+            TextNode("This is text with multiple images:", TextType.NORMAL),
+            TextNode("this ", TextType.NORMAL),
+            TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and that ", TextType.NORMAL),
+            TextNode("other image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg")
+        ])
 
     def test_extract_markdown_images_no_alt(self):
-        matches = extract_markdown_images(
-                "This is text with an ![](https://i.imgur.com/zjjcJKZ.png)"
-            )
-        self.assertListEqual(matches, [("", "https://i.imgur.com/zjjcJKZ.png")])
+        old_nodes = [TextNode("This is text with an ![](https://i.imgur.com/zjjcJKZ.png)", TextType.NORMAL)]
+        self.assertListEqual(extract_markdown_images(old_nodes), [
+            TextNode("This is text with an ", TextType.NORMAL),
+            TextNode("", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png")
+        ])
 
     def test_extract_markdown_images_no_url(self):
-        matches = extract_markdown_images(
-                "This is text with an ![image]()"
-            )
-        self.assertListEqual(matches, [])
+        old_nodes = [TextNode("This is text with an ![image]()", TextType.NORMAL)]
+        self.assertListEqual(extract_markdown_images(old_nodes), old_nodes)
 
     def test_extract_markdown_images_link(self):
-        matches = extract_markdown_images(
-                "This is text with an [link](https://www.example.com)"
-            )
-        self.assertListEqual(matches, [])
+        old_nodes = [TextNode("This is text with a [link](https://www.example.com)", TextType.NORMAL)]
+        self.assertListEqual(extract_markdown_images(old_nodes), old_nodes)
 
     def test_extract_markdown_links_simple(self):
-        matches = extract_markdown_links(
-                "This is text with an [link](https://www.example.com)"
-            )
-        self.assertListEqual(matches, [("link", "https://www.example.com")])
+        old_nodes = [TextNode("This is text with a [link](https://www.example.com)", TextType.NORMAL)]
+        self.assertListEqual(extract_markdown_links(old_nodes), [
+            TextNode("This is text with a ", TextType.NORMAL),
+            TextNode("link", TextType.LINK, "https://www.example.com")
+        ])
 
     def test_extract_markdown_links_multiple(self):
-        matches = extract_markdown_links(
-                "This is text with multiple links: this [link](https://www.example.com) and that [other link](https://www.example.com/home)"
-            )
-        self.assertListEqual(matches, [
-            ("link", "https://www.example.com"),
-            ("other link", "https://www.example.com/home")
+        old_nodes = [
+            TextNode("This is text with multiple links:", TextType.NORMAL),
+            TextNode("this [link](https://www.example.com) and that [other link](https://www.example.com/home)", TextType.NORMAL),
+        ]
+        self.assertListEqual(extract_markdown_links(old_nodes), [
+            TextNode("This is text with multiple links:", TextType.NORMAL),
+            TextNode("this ", TextType.NORMAL),
+            TextNode("link", TextType.LINK, "https://www.example.com"),
+            TextNode(" and that ", TextType.NORMAL),
+            TextNode("other link", TextType.LINK, "https://www.example.com/home")
         ])
 
     def test_extract_markdown_links_no_text(self):
-        matches = extract_markdown_links(
-                "This is text with an [](https://www.example.com)"
-            )
-        self.assertListEqual(matches, [("", "https://www.example.com")])
+        old_nodes = [TextNode("This is text with a [](https://www.example.com)", TextType.NORMAL)]
+        self.assertListEqual(extract_markdown_links(old_nodes), [
+            TextNode("This is text with a ", TextType.NORMAL),
+            TextNode("", TextType.LINK, "https://www.example.com")
+        ])
 
     def test_extract_markdown_links_no_url(self):
-        matches = extract_markdown_links(
-                "This is text with an [link]()"
-            )
-        self.assertListEqual(matches, [])
+        old_nodes = [TextNode("This is text with a [link]()", TextType.NORMAL)]
+        self.assertListEqual(extract_markdown_links(old_nodes), old_nodes)
 
     def test_extract_markdown_links_beginning(self):
-        matches = extract_markdown_links(
-                "[link](https://www.example.com) is a link"
-            )
-        self.assertListEqual(matches, [("link", "https://www.example.com")])
+        old_nodes = [TextNode("[link](https://www.example.com) is a link", TextType.NORMAL)]
+        self.assertListEqual(extract_markdown_links(old_nodes), [
+            TextNode("link", TextType.LINK, "https://www.example.com"),
+            TextNode(" is a link", TextType.NORMAL)
+        ])
 
     def test_extract_markdown_links_image(self):
-        matches = extract_markdown_links(
-                "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
-            )
-        self.assertListEqual(matches, [])
+        old_nodes = [TextNode("This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)", TextType.NORMAL)]
+        self.assertListEqual(extract_markdown_links(old_nodes), old_nodes)
 
 if __name__ == "__main__":
     unittest.main()

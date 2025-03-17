@@ -36,11 +36,30 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                 new_nodes.append(TextNode(text_parts[i], TextType.NORMAL))
     return new_nodes
 
-def extract_markdown_images(text):
-    return re.findall(r"!\[(.*?)\]\((.+?)\)", text)
+def extract_markdown_images(old_nodes):
+    return split_nodes_regex(old_nodes, r"!\[(?P<text>.*?)\]\((?P<url>.+?)\)", TextType.IMAGE)
 
-def extract_markdown_links(text):
-    return re.findall(r"(?:[^!]|^)\[(.*?)\]\((.+?)\)", text)
+def extract_markdown_links(old_nodes):
+    return split_nodes_regex(old_nodes, r"(?P<prefix>[^!]|^)\[(?P<text>.*?)\]\((?P<url>.+?)\)", TextType.LINK)
+
+def split_nodes_regex(old_nodes, pattern, text_type):
+    new_nodes = []
+    for old_node in old_nodes:
+        if old_node.text_type != TextType.NORMAL:
+            new_nodes.append(old_node)
+            continue
+        text = old_node.text
+        matches = re.finditer(pattern, text)
+        for match in matches:
+            prefix_length = 0 if "prefix" not in match.groupdict() else len(match["prefix"])
+            pos = text.find(match[0])
+            if text[:pos + prefix_length] != "":
+                new_nodes.append(TextNode(text[:pos + prefix_length], TextType.NORMAL))
+            new_nodes.append(TextNode(match["text"], text_type, match["url"]))
+            text = text[pos + len(match[0]):]
+        if text != "":
+            new_nodes.append(TextNode(text, TextType.NORMAL))
+    return new_nodes
 
 def main():
     print("hello world")
