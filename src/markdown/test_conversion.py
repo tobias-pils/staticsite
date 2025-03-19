@@ -55,7 +55,7 @@ class TestConversion(unittest.TestCase):
         html = markdown_to_html_node(md).to_html()
         self.assertEqual(
             html,
-            "<body><code>Hello world!</code></body>"
+            "<body><pre><code>Hello world!</code></pre></body>"
         )
 
     def test_markdown_to_html_node_code_inline_markdown(self):
@@ -63,7 +63,7 @@ class TestConversion(unittest.TestCase):
         html = markdown_to_html_node(md).to_html()
         self.assertEqual(
             html,
-            "<body><code>**Hello** _world!_</code></body>"
+            "<body><pre><code>**Hello** _world!_</code></pre></body>"
         )
 
     def test_markdown_to_html_node_multiple_lines(self):
@@ -75,11 +75,11 @@ def this_is_a_line_of_code():
         html = markdown_to_html_node(md).to_html()
         self.assertEqual(
             html,
-            """<body><code>
+            """<body><pre><code>
 def this_is_a_line_of_code():
     while True:
         return True
-</code></body>"""
+</code></pre></body>"""
         )
 
     def test_markdown_to_html_node_quote(self):

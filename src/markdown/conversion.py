@@ -17,8 +17,8 @@ def markdown_to_html_node(markdown):
                 children = text_to_html_nodes(block[level + 1:])
                 html_nodes.append(ParentNode(f"h{level}", children))
             case BlockType.CODE:
-                text_node = TextNode(block[3:-3], TextType.CODE)
-                html_nodes.append(text_node.to_html_node())
+                children = [TextNode(block[3:-3], TextType.CODE).to_html_node()]
+                html_nodes.append(ParentNode("pre", children))
             case BlockType.QUOTE:
                 text = "\n".join(map(lambda l: l[1:], block.split("\n")))
                 children = text_to_html_nodes(text)
