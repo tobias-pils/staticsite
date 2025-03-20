@@ -21,7 +21,7 @@ def markdown_to_html_node(markdown):
                 children = [TextNode(block[4:-4], TextType.CODE).to_html_node()]
                 html_nodes.append(ParentNode("pre", children))
             case BlockType.QUOTE:
-                text = "\n".join(map(lambda l: l[1:], block.split("\n")))
+                text = "\n".join(map(lambda l: l[1:].strip(), block.split("\n")))
                 children = text_to_html_nodes(text)
                 html_nodes.append(ParentNode("blockquote", children))
             case BlockType.UNORDERED_LIST:
@@ -56,8 +56,7 @@ def generate_page(from_path, template_path, dest_path):
     if not os.path.exists(from_path):
         raise Exception(f"'From' file {from_path} does not exist")
 
-    from_filename = os.path.basename(from_path)
-    if os.path.isdir(from_path) or from_filename == "":
+    if os.path.isdir(from_path):
         raise Exception(f"{from_path} is not a file")
 
     if not os.path.exists(template_path):
@@ -65,14 +64,7 @@ def generate_page(from_path, template_path, dest_path):
 
     dest_dir = os.path.dirname(dest_path)
     if not os.path.exists(dest_dir):
-        raise Exception(f"'Destination' directory {from_path} does not exist")
-    dest_filename = os.path.basename(dest_path)
-    if dest_filename == "":
-        dest_filename = from_filename
-        if dest_filename.rfind(".") > 0:
-            dest_filename = dest_filename[:dest_filename.rfind(".")]
-    if not dest_filename.endswith(".html"):
-        dest_filename += ".html"
+        os.makedirs(dest_dir)
 
     with open(from_path, encoding="utf-8") as from_file:
         markdown = from_file.read()
@@ -81,5 +73,5 @@ def generate_page(from_path, template_path, dest_path):
     title = extract_title(markdown)
     content = markdown_to_html_node(markdown).to_html()
     html = template.replace("{{ Title }}", title).replace("{{ Content }}", content)
-    with open(os.path.join(dest_dir, dest_filename), "w") as dest_file:
+    with open(dest_path, "w") as dest_file:
         dest_file.write(html)

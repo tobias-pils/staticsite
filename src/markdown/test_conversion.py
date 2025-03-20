@@ -108,6 +108,18 @@ Hello again world!</blockquote></div>"""
 Hello again world!</blockquote></div>"""
         )
 
+    def test_markdown_to_html_node_quote_spaces(self):
+        md = """> Hello world!
+> Bye world!
+> Hello again world!"""
+        html = markdown_to_html_node(md).to_html()
+        self.assertEqual(
+            html,
+            """<div><blockquote>Hello world!
+Bye world!
+Hello again world!</blockquote></div>"""
+        )
+
     def test_markdown_to_html_node_unordered_list(self):
         md = """- Hello world!
 - Bye world!
