@@ -43,3 +43,9 @@ def get_list_items(block):
         line_children = text_to_html_nodes(line[num_len:])
         children.append(ParentNode("li", line_children))
     return children
+
+def extract_title(markdown):
+    for line in markdown.split("\n"):
+        if line.startswith("# "):
+            return line[1:].strip()
+    raise Exception("Markdown does not contain a title")

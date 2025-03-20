@@ -1,5 +1,5 @@
 import unittest
-from .conversion import markdown_to_html_node
+from .conversion import extract_title, markdown_to_html_node
 
 class TestConversion(unittest.TestCase):
     def test_markdown_to_html_node_paragraph(self):
@@ -153,6 +153,18 @@ Hello again world!</blockquote></body>"""
             html,
             "<body><ol><li>A</li><li>B</li><li>C</li><li>D</li><li>E</li><li>F</li><li>G</li><li>H</li><li>I</li><li>J</li><li>K</li></ol></body>"
         )
+
+    def test_extract_title_simple(self):
+        md = "# My Title"
+        self.assertEqual(extract_title(md), "My Title")
+
+    def test_extract_title_multiple_lines(self):
+        md = "\n<building tension>\n\n#   My Title   \n\nnothing to see...\n"
+        self.assertEqual(extract_title(md), "My Title")
+
+    def test_extract_title_no_title(self):
+        md = " # not a title\nnothing to see...\nbye"
+        self.assertRaises(Exception, extract_title, md)
 
 if __name__ == "__main__":
     unittest.main()
