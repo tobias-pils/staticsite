@@ -1,3 +1,4 @@
+import os
 from .inlinemarkdown import text_to_textnodes
 from .blockmarkdown import BlockType, block_to_block_type, markdown_to_blocks
 from nodes.parentnode import ParentNode
@@ -17,7 +18,7 @@ def markdown_to_html_node(markdown):
                 children = text_to_html_nodes(block[level + 1:])
                 html_nodes.append(ParentNode(f"h{level}", children))
             case BlockType.CODE:
-                children = [TextNode(block[3:-3], TextType.CODE).to_html_node()]
+                children = [TextNode(block[4:-4], TextType.CODE).to_html_node()]
                 html_nodes.append(ParentNode("pre", children))
             case BlockType.QUOTE:
                 text = "\n".join(map(lambda l: l[1:], block.split("\n")))
@@ -31,7 +32,7 @@ def markdown_to_html_node(markdown):
                 html_nodes.append(ParentNode("ol", children))
             case _:
                 raise ValueError("Markdown block type not supported")
-    return ParentNode("body", html_nodes)
+    return ParentNode("div", html_nodes)
 
 def text_to_html_nodes(block):
     return list(map(TextNode.to_html_node, text_to_textnodes(block)))
@@ -49,3 +50,36 @@ def extract_title(markdown):
         if line.startswith("# "):
             return line[1:].strip()
     raise Exception("Markdown does not contain a title")
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    if not os.path.exists(from_path):
+        raise Exception(f"'From' file {from_path} does not exist")
+
+    from_filename = os.path.basename(from_path)
+    if os.path.isdir(from_path) or from_filename == "":
+        raise Exception(f"{from_path} is not a file")
+
+    if not os.path.exists(template_path):
+        raise Exception(f"'Template' file {template_path} does not exist")
+
+    dest_dir = os.path.dirname(dest_path)
+    if not os.path.exists(dest_dir):
+        raise Exception(f"'Destination' directory {from_path} does not exist")
+    dest_filename = os.path.basename(dest_path)
+    if dest_filename == "":
+        dest_filename = from_filename
+        if dest_filename.rfind(".") > 0:
+            dest_filename = dest_filename[:dest_filename.rfind(".")]
+    if not dest_filename.endswith(".html"):
+        dest_filename += ".html"
+
+    with open(from_path, encoding="utf-8") as from_file:
+        markdown = from_file.read()
+    with open(template_path, encoding="utf-8") as template_file:
+        template = template_file.read()
+    title = extract_title(markdown)
+    content = markdown_to_html_node(markdown).to_html()
+    html = template.replace("{{ Title }}", title).replace("{{ Content }}", content)
+    with open(os.path.join(dest_dir, dest_filename), "w") as dest_file:
+        dest_file.write(html)

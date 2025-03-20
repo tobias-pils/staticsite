@@ -15,7 +15,7 @@ def markdown_to_blocks(markdown):
 def block_to_block_type(block):
     if re.fullmatch(r"^#{1,6} .*$", block) != None:
         return BlockType.HEADING
-    if re.fullmatch(r"^```[\s\S]*```$", block) != None:
+    if re.fullmatch(r"^```\n[\s\S]*\n```$", block) != None:
         return BlockType.CODE
     if re.fullmatch(r"^>.*(\n>.*)*$", block) != None:
         return BlockType.QUOTE

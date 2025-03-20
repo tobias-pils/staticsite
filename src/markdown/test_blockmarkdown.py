@@ -59,7 +59,9 @@ This is the same paragraph on a new line
         self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
 
     def test_block_to_block_type_code_one_line(self):
-        block = "```this is a line of code```"
+        block = """```
+this is a line of code
+```"""
         self.assertEqual(block_to_block_type(block), BlockType.CODE)
 
     def test_block_to_block_type_code_multiple_lines(self):
